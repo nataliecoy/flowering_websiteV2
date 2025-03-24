@@ -78,24 +78,18 @@ nav {
 
 /* ✅ Hero Section (Fixed Background Image) */
 .hero {
-    min-height: 100vh; /* not height: 100vh */
-    padding-top: 100px; /* or whatever your header height is */
+    min-height: 100vh;
+    background: url('assets/hero.jpg') center/cover no-repeat;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
-    background: url('assets/hero.jpg') center/cover no-repeat;
     text-align: center;
-  }
+    padding-top: 100px; /* prevents content hiding behind header */
+    padding-bottom: 50px;
+    position: relative;
+  }  
   
-
-/* ✅ Keeps the Hero Image Fixed While Scrolling */
-.hero.fixed {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-}
 
 /* ✅ Dark Overlay for Text Readability */
 .hero::before {
