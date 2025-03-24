@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Seagrass Data</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- ✅ Leaflet.js for Map -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.js"></script>
+
+    <!-- ✅ Leaflet Geocoder Plugin -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">Seagrass Project</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="upload.html">Upload Data</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="upload-container">
+        <h2>Report a Seagrass Sighting</h2>
+
+        <!-- ✅ Interactive Map -->
+        <div id="map" style="width: 100%; height: 300px;"></div>
+
+        <form id="upload-form">
+            <label for="photo">Upload a Photo:</label>
+            <input type="file" id="photo" accept="image/*" required>
+
+            <label for="date">Date of Sighting:</label>
+            <input type="date" id="date" required>
+
+            <label for="time">Time of Sighting:</label>
+            <input type="time" id="time" required>
+
+            <label for="location">Location (Latitude, Longitude):</label>
+            <input type="text" id="location" placeholder="Click on the map" required readonly>
+
+            <label for="estuary">Nearby Estuary:</label>
+            <input type="text" id="estuary" placeholder="Enter estuary name (e.g., Sydney Harbour)" required>
+
+            <label for="weather">Weather Conditions:</label>
+            <input type="text" id="weather" placeholder="Wind direction/speed, weather forecast, etc.">
+
+            <label for="tide">Tide Level:</label>
+            <select id="tide">
+                <option value="Low">Low</option>
+                <option value="Mid">Mid</option>
+                <option value="High">High</option>
+            </select>
+
+            <button type="submit">Submit Data</button>
+        </form>
+
+        <p id="response-message"></p>
+    </section>
+
+    <!-- ✅ Firebase & External JavaScript -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
