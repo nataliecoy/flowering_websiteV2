@@ -14,15 +14,14 @@ body {
 /* ✅ Navigation Bar (Sticky Header) */
 header {
     position: fixed;
-    width: 100%;
     top: 0;
-    left: 0;
-    background: rgba(0, 40, 30, 0.8); /* 🌿 Green Transparent */
+    width: 100%;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
-    padding: 15px 0;
     z-index: 1000;
-    transition: all 0.3s ease-in-out;
-}
+  }
+  
 
 /* ✅ Header when Scrolled */
 header.scrolled {
@@ -79,16 +78,16 @@ nav {
 
 /* ✅ Hero Section (Fixed Background Image) */
 .hero {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    background: url('assets/hero.jpg') no-repeat center center/cover;
+    min-height: 100vh; /* not height: 100vh */
+    padding-top: 100px; /* or whatever your header height is */
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    background: url('assets/hero.jpg') center/cover no-repeat;
     text-align: center;
-    color: white;
-}
+  }
+  
 
 /* ✅ Keeps the Hero Image Fixed While Scrolling */
 .hero.fixed {
@@ -204,3 +203,8 @@ footer {
         padding: 60px 20px;
     }
 }
+
+html, body {
+    height: auto;
+    overflow-y: auto;
+  }
