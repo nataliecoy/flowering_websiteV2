@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Contact Us | Seagrass Project</title>
   <link rel="stylesheet" href="styles.css">
   <style>
@@ -12,6 +12,7 @@
       background: #002433;
       border-radius: 8px;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      color: white;
     }
 
     .contact-container h2 {
@@ -80,14 +81,13 @@
     <form id="contact-form">
       <input type="text" id="name" placeholder="Your Name" required>
       <input type="email" id="email" placeholder="Your Email" required>
-      <input type="text" id="subject" placeholder="Subject" required />
+      <input type="text" id="subject" placeholder="Subject" required>
       <textarea id="message" placeholder="Your Message" required></textarea>
       <button type="submit">Send Message</button>
       <p class="confirmation" id="confirmation-text"></p>
     </form>
   </section>
 
-  <!-- Footer -->
   <footer style="background: #000a12; padding: 30px 0; color: white; text-align: center;">
     <div style="max-width: 1000px; margin: auto; padding: 0 20px;">
       <p style="margin-bottom: 15px;">&copy; 2025 Seagrass Restoration Project • Protecting Ocean Life</p>
@@ -97,70 +97,73 @@
         <a href="map.html" style="color: #00ffcc; text-decoration: none;">Sightings</a>
         <a href="contact.html" style="color: #00ffcc; text-decoration: none;">Contact Us</a>
         <a href="admin.html" style="color: #00ffcc; text-decoration: none;">Admin</a>
-    
       </nav>
     </div>
   </footer>
-<!-- EmailJS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script>
-  emailjs.init("ucAESWUfh6qlm28Fu"); // ✅ Your public EmailJS key
-</script>
 
-<!-- Firebase & EmailJS Logic -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+  <!-- ✅ EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("ucAESWUfh6qlm28Fu"); // ✅ Your public EmailJS key
+  </script>
 
-  // ✅ Your Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBxnvHY7k8rvIBd5eRzroMeWqg1vYQ0vRo", authDomain: "seagrass-sex.firebaseapp.com", projectId: "seagrass-sex", storageBucket: "seagrass-sex.firebasestorage.app", messagingSenderId: "762828890149", appId: "1:762828890149:web:e4776e300fb82a6cd1dfcc", measurementId: "G-7KTXD5P8ET" };
+  <!-- ✅ Firebase + EmailJS Form Handling -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+    // ✅ Your Firebase config
+    const firebaseConfig = {
+        apiKey: "AIzaSyBxnvHY7k8rvIBd5eRzroMeWqg1vYQ0vRo", authDomain: "seagrass-sex.firebaseapp.com", projectId: "seagrass-sex", storageBucket: "seagrass-sex.firebasestorage.app", messagingSenderId: "762828890149", appId: "1:762828890149:web:e4776e300fb82a6cd1dfcc", measurementId: "G-7KTXD5P8ET" };
 
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  document.getElementById("contact-form").addEventListener("submit", async function (e) {
-    e.preventDefault();
+    document.getElementById("contact-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
 
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const message = document.getElementById("message").value.trim();
-    const subject = document.getElementById("subject").value.trim();
-    const confirmation = document.getElementById("confirmation-text");
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const subject = document.getElementById("subject").value.trim();
+      const message = document.getElementById("message").value.trim();
+      const confirmation = document.getElementById("confirmation-text");
 
-    if (!name || !email || !message) return;
+      // 🔒 Create custom Firestore document ID
+      const now = new Date();
+      const dateStamp = now.toISOString().split("T")[0]; // e.g., "2025-03-24"
+      const safeSubject = subject.toLowerCase().replace(/\s+/g, "_").replace(/[^\w\-]/g, "");
+      const customID = `${dateStamp}_${safeSubject}`;
 
-    try {
-      // ✅ Save to Firestore
-      await addDoc(collection(db, "inquiries"), {
-        name,
-        email,
-        subject,
-        message,
-        submittedAt: serverTimestamp()
-      });
+      try {
+        // ✅ Save to Firestore
+        const docRef = doc(db, "inquiries", customID);
+        await setDoc(docRef, {
+          name,
+          email,
+          subject,
+          message,
+          submittedAt: serverTimestamp()
+        });
 
-      // ✅ Send Email with EmailJS
-      await emailjs.send("nat_gmail", "seagrass_contact", {
-        from_name: name,
-        from_email: email,
-        subject: subject,
-        message: message
-      });
+        // ✅ Send Email
+        await emailjs.send("nat_gmail", "seagrass_contact", {
+          from_name: name,
+          from_email: email,
+          subject: subject,
+          message: message
+        });
 
-      confirmation.textContent = "✅ Message sent successfully!";
-      confirmation.style.color = "#00ffcc";
-      this.reset();
-    } catch (err) {
-      console.error("❌ Error submitting contact form:", err);
-      confirmation.textContent = "❌ Something went wrong. Please try again later.";
-      confirmation.style.color = "red";
-    }
-  });
-</script>
-
-  
+        confirmation.textContent = "✅ Message sent successfully!";
+        confirmation.style.color = "#00ffcc";
+        this.reset();
+      } catch (err) {
+        console.error("❌ Error submitting contact form:", err);
+        confirmation.textContent = "❌ Something went wrong. Please try again later.";
+        confirmation.style.color = "red";
+      }
+    });
+  </script>
 
 </body>
 </html>

@@ -1,96 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <style>
     body {
-      background-color: #001524;
+      background: #001524;
       color: white;
-      padding: 2rem;
       font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 2rem;
     }
+
+    .hidden { display: none; }
+
+    header h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      color: #00ffcc;
+    }
+
+    .tab.active {
+      border-bottom: 2px solid #00ffcc;
+      font-weight: bold;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 2rem;
+      margin-top: 1rem;
     }
+
     th, td {
-      padding: 12px;
+      padding: 10px;
       border: 1px solid #ccc;
       color: white;
+      text-align: left;
     }
+
     th {
-      background-color: #003c5f;
+      background: #003c5f;
     }
+
     .logout-btn {
+      float: right;
       background: #ff4d4d;
       padding: 8px 16px;
-      color: white;
       border: none;
-      border-radius: 5px;
+      color: white;
+      border-radius: 4px;
       cursor: pointer;
+    }
+
+    button {
+      background: #00ffcc;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .export-btn {
+      margin-top: 10px;
+      background: #009988;
+    }
+
+    img {
+      max-height: 40px;
+      border-radius: 4px;
+    }
+
+    .trash-link {
       float: right;
-    }
-    .filter-container {
-      margin: 1rem 0;
-    }
-    .hidden {
-      display: none;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <button class="logout-btn hidden" onclick="logout()">Logout</button>
+  </header>
 
-  <h1>Admin Dashboard</h1>
-  <button class="logout-btn" onclick="logout()">Logout</button>
-
+  <!-- 🔐 Login Section -->
   <div id="login-section">
     <h2>Admin Login</h2>
-    <input type="email" id="email" placeholder="Email"><br><br>
-    <input type="password" id="password" placeholder="Password"><br><br>
+    <input type="email" id="email" placeholder="Email" /><br /><br />
+    <input type="password" id="password" placeholder="Password" /><br /><br />
     <button onclick="login()">Login</button>
     <p id="login-error" style="color: red;"></p>
   </div>
 
+  <!-- 📊 Admin Panel -->
   <div id="dashboard" class="hidden">
-    <div class="filter-container">
-      <input type="text" id="filter-estuary" placeholder="Filter by estuary">
-      <input type="date" id="filter-date">
-      <button onclick="downloadCSV()">⬇ Download CSV</button>
+    <div class="tabs">
+      <div class="tab active" data-tab="submissions">🌿 Submissions</div>
+      <div class="tab" data-tab="inquiries">💌 Inquiries</div>
     </div>
 
-    <div style="text-align: right; margin-bottom: 10px;">
-      <a href="trash.html" style="color: #fff; background: #cc3333; padding: 6px 12px; border-radius: 4px; text-decoration: none;">🗃️ View Trash Bin</a>
+    <!-- 🌿 Submissions -->
+    <div id="submissions" class="tab-content active">
+      <div>
+        <button class="export-btn" id="export-submissions">⬇ Export CSV</button>
+        <a class="trash-link" href="trash.html" style="color: white;">🗃️ View Trash</a>
+      </div>
+      <table id="submissions-table"></table>
     </div>
-    
-    <table id="data-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Time</th>
-          <th>Estuary</th>
-          <th>Location</th>
-          <th>Weather</th>
-          <th>Tide</th>
-          <th>Photo</th>
-          <th>Delete</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+
+    <!-- 💌 Inquiries -->
+    <div id="inquiries" class="tab-content">
+      <button class="export-btn" id="export-inquiries">⬇ Export CSV</button>
+      <table id="inquiries-table"></table>
+    </div>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js"></script>
-
-  <!-- Custom Admin Logic -->
+  <!-- ✅ Firebase + Logic -->
   <script type="module" src="admin.js"></script>
 
+  <!-- ✅ Tabs Script -->
+  <script>
+    const tabs = document.querySelectorAll(".tab");
+    const contents = document.querySelectorAll(".tab-content");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        contents.forEach(c => c.classList.remove("active"));
+
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab).classList.add("active");
+      });
+    });
+  </script>
+
+  <!-- ✅ Footer -->
   <footer style="background: #000a12; padding: 30px 0; color: white; text-align: center;">
     <div style="max-width: 1000px; margin: auto; padding: 0 20px;">
       <p style="margin-bottom: 15px;">&copy; 2025 Seagrass Restoration Project • Protecting Ocean Life</p>
@@ -100,10 +166,8 @@
         <a href="map.html" style="color: #00ffcc; text-decoration: none;">Sightings</a>
         <a href="contact.html" style="color: #00ffcc; text-decoration: none;">Contact Us</a>
         <a href="admin.html" style="color: #00ffcc; text-decoration: none;">Admin</a>
-  
       </nav>
     </div>
   </footer>
-  
 </body>
 </html>
