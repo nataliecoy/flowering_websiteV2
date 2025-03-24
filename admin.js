@@ -24,14 +24,8 @@ import {
 
 // ✅ Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyBxnvHY7k8rvIBd5eRzroMeWqg1vYQ0vRo",
-  authDomain: "seagrass-sex.firebaseapp.com",
-  projectId: "seagrass-sex",
-  storageBucket: "seagrass-sex.firebasestorage.app",
-  messagingSenderId: "762828890149",
-  appId: "1:762828890149:web:e4776e300fb82a6cd1dfcc",
-  measurementId: "G-7KTXD5P8ET",
-};
+  apiKey: "AIzaSyBxnvHY7k8rvIBd5eRzroMeWqg1vYQ0vRo", authDomain: "seagrass-sex.firebaseapp.com", projectId: "seagrass-sex", storageBucket: "seagrass-sex.firebasestorage.app", messagingSenderId: "762828890149", appId: "1:762828890149:web:e4776e300fb82a6cd1dfcc", measurementId: "G-7KTXD5P8ET" };
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -143,12 +137,13 @@ window.deleteEntry = async (id) => {
 
     const data = docSnap.data();
 
-    await setDoc(doc(db, "deleted_sightings", id), {
-      ...data,
-      deletedAt: new Date(),
-    });
+await setDoc(doc(db, "deleted_sightings", id), {
+  ...data,
+  deletedAt: new Date()
+});
 
-    await deleteDoc(originalDoc);
+await deleteDoc(doc(db, "sightings", id));
+
 
     if (data.imageUrl) {
       const imageRef = ref(storage, `sightings/${id}.jpg`);
@@ -306,8 +301,10 @@ window.deleteInquiry = async (id) => {
     const data = snap.data();
     await setDoc(doc(db, "deleted_inquiries", id), {
       ...data,
-      deletedAt: new Date(),
+      deletedAt: new Date()
     });
+    await deleteDoc(doc(db, "inquiries", id));
+    
 
     await deleteDoc(ref);
     alert("Inquiry moved to trash.");

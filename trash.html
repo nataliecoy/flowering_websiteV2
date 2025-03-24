@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Trash Bin | Seagrass Admin</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css">
   <style>
     body {
       background: #001524;
@@ -11,18 +11,15 @@
       font-family: 'Poppins', sans-serif;
       padding: 2rem;
     }
-
     h1 {
       text-align: center;
     }
-
     .tabs {
       display: flex;
       justify-content: center;
       gap: 20px;
       margin-top: 40px;
     }
-
     .tab-button {
       background: #003c5f;
       color: white;
@@ -31,63 +28,45 @@
       cursor: pointer;
       font-weight: bold;
     }
-
     .tab-button.active {
       background: #00ffcc;
       color: #001524;
     }
-
     .tab-content {
       display: none;
       margin-top: 30px;
     }
-
     .tab-content.active {
       display: block;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
-
     th, td {
       padding: 10px;
       border: 1px solid #ccc;
       color: white;
     }
-
     th {
       background-color: #003c5f;
     }
-
     img {
       max-width: 60px;
       border-radius: 4px;
     }
-
-    td button {
-      margin-right: 5px;
-      padding: 5px 8px;
+    .action-btns button {
+      margin-right: 6px;
+      padding: 6px 10px;
+      background-color: #00ffcc;
+      color: #001524;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
-
-    td button:hover {
-      opacity: 0.9;
-    }
-
-    .actions button {
-      background-color: #00ffcc;
-      color: #001524;
-      font-weight: bold;
-    }
-
-    .actions .delete {
-      background-color: #cc3333;
-      color: white;
+    .action-btns button:hover {
+      background-color: #00bfa6;
     }
   </style>
 </head>
@@ -96,7 +75,7 @@
   <h1>🗃️ Trash Bin</h1>
 
   <div class="tabs">
-    <button class="tab-button" data-tab="deleted-sightings">Sightings</button>
+    <button class="tab-button active" data-tab="deleted-sightings">Sightings</button>
     <button class="tab-button" data-tab="deleted-inquiries">Inquiries</button>
   </div>
 
@@ -104,8 +83,7 @@
     <a href="admin.html#submissions" id="back-to-admin" style="color: #00ffcc; text-decoration: underline;">← Back to Admin Dashboard</a>
   </div>
 
-  <!-- ✅ Deleted Sightings -->
-  <div id="deleted-sightings" class="tab-content">
+  <div id="deleted-sightings" class="tab-content active">
     <h2>Deleted Sightings</h2>
     <table id="sightings-trash-table">
       <thead>
@@ -123,7 +101,6 @@
     </table>
   </div>
 
-  <!-- ✅ Deleted Inquiries -->
   <div id="deleted-inquiries" class="tab-content">
     <h2>Deleted Inquiries</h2>
     <table id="inquiries-trash-table">
@@ -142,50 +119,34 @@
   </div>
 
   <!-- Firebase SDKs -->
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js"></script>
-
-  <!-- Trash Logic -->
   <script type="module" src="trash.js"></script>
 
-  <!-- Tab Switch + Back Link -->
+  <!-- Tab/Link Logic -->
   <script>
     const tabButtons = document.querySelectorAll(".tab-button");
     const tabContents = document.querySelectorAll(".tab-content");
     const backLink = document.getElementById("back-to-admin");
-  
-    function activateTrashTab(tabId) {
-      tabButtons.forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.tab === tabId);
-      });
-  
-      tabContents.forEach(content => {
-        content.classList.toggle("active", content.id === tabId);
-      });
-  
-      // Update back link based on tab
-      const newHref = tabId === "deleted-inquiries" ? "admin.html#inquiries" : "admin.html#submissions";
-      backLink.setAttribute("href", newHref);
+
+    function activateTab(tabId) {
+      tabButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tabId));
+      tabContents.forEach(tab => tab.classList.toggle("active", tab.id === tabId));
+      backLink.href = tabId === "deleted-inquiries" ? "admin.html#inquiries" : "admin.html#submissions";
     }
-  
-    // Get hash on load (e.g., #deleted-inquiries)
+
     window.addEventListener("DOMContentLoaded", () => {
       const hash = window.location.hash.replace("#", "");
-      const initialTab = hash === "deleted-inquiries" ? "deleted-inquiries" : "deleted-sightings";
-      activateTrashTab(initialTab);
+      const tabId = hash === "deleted-inquiries" ? "deleted-inquiries" : "deleted-sightings";
+      activateTab(tabId);
     });
-  
-    // On tab click
+
     tabButtons.forEach(btn => {
       btn.addEventListener("click", () => {
         const tabId = btn.dataset.tab;
-        activateTrashTab(tabId);
         history.replaceState(null, "", `#${tabId}`);
+        activateTab(tabId);
       });
     });
   </script>
-  
 
   <!-- Footer -->
   <footer style="background: #000a12; padding: 30px 0; color: white; text-align: center;">
@@ -200,7 +161,5 @@
       </nav>
     </div>
   </footer>
-
-
 </body>
 </html>
