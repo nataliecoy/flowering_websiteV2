@@ -80,6 +80,7 @@
     <form id="contact-form">
       <input type="text" id="name" placeholder="Your Name" required>
       <input type="email" id="email" placeholder="Your Email" required>
+      <input type="text" id="subject" placeholder="Subject" required />
       <textarea id="message" placeholder="Your Message" required></textarea>
       <button type="submit">Send Message</button>
       <p class="confirmation" id="confirmation-text"></p>
@@ -134,6 +135,7 @@
       await addDoc(collection(db, "inquiries"), {
         name,
         email,
+        subject,
         message,
         submittedAt: serverTimestamp()
       });
@@ -142,6 +144,7 @@
       await emailjs.send("nat_gmail", "seagrass_contact", {
         from_name: name,
         from_email: email,
+        subject: subject,
         message: message
       });
 
