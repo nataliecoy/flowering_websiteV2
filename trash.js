@@ -1,37 +1,47 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 import {
-  getFirestore,
-  collection,
-  getDocs,
-  deleteDoc,
-  setDoc,
-  doc
+  getFirestore, collection, getDocs, deleteDoc, setDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 import {
-  getStorage,
-  ref as storageRef,
-  deleteObject
+  getStorage, ref as storageRef, deleteObject
 } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js";
 
+// ✅ Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyBxnvHY7k8rvIBd5eRzroMeWqg1vYQ0vRo", authDomain: "seagrass-sex.firebaseapp.com", projectId: "seagrass-sex", storageBucket: "seagrass-sex.firebasestorage.app", messagingSenderId: "762828890149", appId: "1:762828890149:web:e4776e300fb82a6cd1dfcc", measurementId: "G-7KTXD5P8ET" };
 
 
+// ✅ Init Firebase
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Helper: Format timestamp
+onAuthStateChanged(auth, async (user) => {
+  if (!user || user.email !== "n.coy@unsw.edu.au") {
+    alert("Access denied. Only admin can view this page.");
+    window.location.href = "index.html";
+    return;
+  }
+
+  loadDeletedSightings();
+  loadDeletedInquiries();
+});
+
+// ✅ Format timestamp to readable date
 function formatDate(timestamp) {
   try {
-    return timestamp?.toDate ? timestamp.toDate().toLocaleString() : "Unknown";
+    if (timestamp?.toDate) return timestamp.toDate().toLocaleString();
+    if (timestamp?.seconds) return new Date(timestamp.seconds * 1000).toLocaleString();
+    return "Unknown";
   } catch {
     return "Unknown";
   }
 }
 
-// Load Deleted Sightings
-export async function loadDeletedSightings() {
+// ✅ Load deleted sightings
+async function loadDeletedSightings() {
   const table = document.querySelector("#sightings-trash-table tbody");
   table.innerHTML = "";
 
@@ -48,7 +58,7 @@ export async function loadDeletedSightings() {
       <td>${data.time || ""}</td>
       <td>${data.imageUrl ? `<a href="${data.imageUrl}" target="_blank"><img src="${data.imageUrl}" /></a>` : "No image"}</td>
       <td>${formatDate(data.deletedAt)}</td>
-      <td class="action-btns">
+      <td>
         <button onclick="restoreEntry('sightings', 'deleted_sightings', '${id}')">♻️ Restore</button>
         <button onclick="permanentlyDelete('deleted_sightings', '${id}', true)">🗑️ Delete</button>
       </td>
@@ -57,8 +67,8 @@ export async function loadDeletedSightings() {
   });
 }
 
-// Load Deleted Inquiries
-export async function loadDeletedInquiries() {
+// ✅ Load deleted inquiries
+async function loadDeletedInquiries() {
   const table = document.querySelector("#inquiries-trash-table tbody");
   table.innerHTML = "";
 
@@ -74,7 +84,7 @@ export async function loadDeletedInquiries() {
       <td>${data.subject || ""}</td>
       <td>${data.message || ""}</td>
       <td>${formatDate(data.deletedAt)}</td>
-      <td class="action-btns">
+      <td>
         <button onclick="restoreEntry('inquiries', 'deleted_inquiries', '${id}')">♻️ Restore</button>
         <button onclick="permanentlyDelete('deleted_inquiries', '${id}', false)">🗑️ Delete</button>
       </td>
@@ -83,46 +93,57 @@ export async function loadDeletedInquiries() {
   });
 }
 
-// Restore
-window.restoreEntry = async (toCol, fromCol, id) => {
-  const fromRef = doc(db, fromCol, id);
-  const dataSnap = await getDocs(collection(db, fromCol));
-  const docSnap = dataSnap.docs.find(d => d.id === id);
+// ✅ Restore entry
+window.restoreEntry = async (toCollection, fromCollection, id) => {
+  try {
+    const fromRef = doc(db, fromCollection, id);
+    const snapshot = await getDocs(collection(db, fromCollection));
+    const restoreSnap = snapshot.docs.find((d) => d.id === id);
 
-  if (!docSnap) return alert("❌ Entry not found.");
-  const data = docSnap.data();
-  delete data.deletedAt;
+    if (!restoreSnap) throw new Error("Document not found.");
 
-  await setDoc(doc(db, toCol, id), data);
-  await deleteDoc(fromRef);
-  alert("✅ Restored.");
-  refreshTab();
+    const data = restoreSnap.data();
+    delete data.deletedAt;
+
+    await setDoc(doc(db, toCollection, id), data);
+    await deleteDoc(fromRef);
+    alert("✅ Restored!");
+    refreshTab();
+  } catch (err) {
+    console.error("❌ Error restoring:", err);
+    alert("❌ Error restoring item.");
+  }
 };
 
-// Delete Permanently
+// ✅ Permanently delete entry
 window.permanentlyDelete = async (collectionName, id, hasImage) => {
-  if (!confirm("⚠️ Permanently delete this entry?")) return;
+  if (!confirm("⚠️ Permanently delete this entry? This cannot be undone.")) return;
 
   try {
     if (hasImage) {
-      const imgRef = storageRef(storage, `sightings/${id}.jpg`);
-      await deleteObject(imgRef);
+      const imageRef = storageRef(storage, `sightings/${id}.jpg`);
+      try {
+        await deleteObject(imageRef);
+      } catch (err) {
+        console.warn("⚠️ Could not delete image (may not exist):", err.message);
+      }
     }
-  } catch (err) {
-    console.warn("⚠️ Image delete error:", err.message);
-  }
 
-  await deleteDoc(doc(db, collectionName, id));
-  alert("✅ Deleted permanently.");
-  refreshTab();
+    await deleteDoc(doc(db, collectionName, id));
+    alert("✅ Permanently deleted.");
+    refreshTab();
+  } catch (err) {
+    console.error("❌ Error deleting permanently:", err);
+    alert("❌ Something went wrong. Check console.");
+  }
 };
 
-// Refresh
+// ✅ Refresh current tab
 function refreshTab() {
-  const active = document.querySelector(".tab-button.active").dataset.tab;
-  active === "deleted-inquiries" ? loadDeletedInquiries() : loadDeletedSightings();
+  const activeTab = document.querySelector(".tab-button.active")?.dataset.tab;
+  if (activeTab === "deleted-sightings") {
+    loadDeletedSightings();
+  } else {
+    loadDeletedInquiries();
+  }
 }
-
-// Initial Load
-loadDeletedSightings();
-loadDeletedInquiries();
