@@ -317,3 +317,32 @@ window.deleteInquiry = async (id) => {
     alert("Something went wrong.");
   }
 };
+
+// 🔍 Inquiry Filters
+document.getElementById("filter-subject")?.addEventListener("input", filterInquiries);
+document.getElementById("filter-inquiry-date")?.addEventListener("input", filterInquiries);
+
+function filterInquiries() {
+  const subjectFilter = document.getElementById("filter-subject").value.toLowerCase();
+  const dateFilter = document.getElementById("filter-inquiry-date").value;
+
+  const rows = document.querySelectorAll("#inquiries-table tbody tr");
+
+  rows.forEach(row => {
+    const subjectText = row.children[2]?.textContent.toLowerCase() || "";
+    const submittedAtText = row.children[4]?.textContent || "";
+
+    // Convert the table's date to YYYY-MM-DD for comparison
+    let rowDate = "";
+    if (submittedAtText) {
+      const dateObj = new Date(submittedAtText);
+      rowDate = dateObj.toISOString().split("T")[0]; // e.g., "2025-03-29"
+    }
+
+    const matchesSubject = subjectText.includes(subjectFilter);
+    const matchesDate = dateFilter === "" || rowDate === dateFilter;
+
+    row.style.display = (matchesSubject && matchesDate) ? "" : "none";
+  });
+}
+

@@ -39,8 +39,15 @@
       font-weight: bold;
     }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    .tab-content {
+  display: none;
+  padding-top: 80px; /* Push tabs down below header */
+}
+
+.tab-content.active {
+  display: block;
+}
+
 
     table {
       width: 100%;
@@ -115,27 +122,37 @@
   </div>
 
   <!-- 📊 Admin Panel -->
-  <div id="dashboard" class="hidden">
+  <div id="dashboard" class="hidden" style="margin-top: 120px;">
     <div class="tabs">
       <div class="tab active" data-tab="submissions">🌿 Submissions</div>
       <div class="tab" data-tab="inquiries">💌 Inquiries</div>
     </div>
 
     <!-- 🌿 Submissions -->
-    <div id="submissions" class="tab-content active">
-      <div>
+    <div id="submissions" class="tab-content active" style="padding-top: 80px;">
+      <div style="margin-bottom: 10px;">
+        <input type="text" id="filter-estuary" placeholder="Filter by estuary" />
+        <input type="date" id="filter-date" />
         <button class="export-btn" id="export-submissions">⬇ Export CSV</button>
-        <a class="trash-link" href="trash.html" style="color: white;">🗃️ View Trash</a>
+        <a href="trash.html#deleted-sightings" class="trash-link">🗃️ View Trash</a>
       </div>
       <table id="submissions-table"></table>
     </div>
+    
 
     <!-- 💌 Inquiries -->
     <div id="inquiries" class="tab-content">
-      <button class="export-btn" id="export-inquiries">⬇ Export CSV</button>
+      <div style="margin-bottom: 10px;">
+        <input type="text" id="filter-subject" placeholder="Filter by subject" />
+        <input type="date" id="filter-inquiry-date" />
+        <button id="export-inquiries" class="export-btn">⬇ Export CSV</button>
+        <a href="trash.html#deleted-inquiries" class="trash-link">🗃️ View Trash</a>
+
+      </div>
       <table id="inquiries-table"></table>
     </div>
-  </div>
+    
+    
 
   <!-- ✅ Firebase + Logic -->
   <script type="module" src="admin.js"></script>
@@ -169,5 +186,36 @@
       </nav>
     </div>
   </footer>
+  <script>
+    const tabButtons = document.querySelectorAll(".tab"); // ✅ .tab not .tab-button
+    const tabContents = document.querySelectorAll(".tab-content");
+  
+    function activateAdminTab(tabId) {
+      tabButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tabId);
+      });
+  
+      tabContents.forEach(content => {
+        content.classList.toggle("active", content.id === tabId);
+      });
+    }
+  
+    // ✅ Activate correct tab based on URL hash on load
+    window.addEventListener("DOMContentLoaded", () => {
+      const hash = window.location.hash.replace("#", "");
+      const initialTab = hash === "inquiries" ? "inquiries" : "submissions";
+      activateAdminTab(initialTab);
+    });
+  
+    // ✅ Handle tab switching with history update
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tabId = btn.dataset.tab;
+        activateAdminTab(tabId);
+        history.replaceState(null, "", `#${tabId}`);
+      });
+    });
+  </script>
+  
 </body>
 </html>
