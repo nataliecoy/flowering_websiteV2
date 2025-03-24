@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, getDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 import { getStorage, ref, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js";
 
 // 🔥 Your Firebase config
@@ -66,15 +66,20 @@ async function loadData() {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td>${data.date}</td>
-      <td>${data.time}</td>
-      <td>${data.estuary}</td>
-      <td>${data.location}</td>
-      <td>${data.weather}</td>
-      <td>${data.tide}</td>
-      <td><a href="${data.imageUrl}" target="_blank">📷 View</a></td>
-      <td><button onclick="deleteEntry('${id}')">🗑️</button></td>
-    `;
+    <td>${data.date}</td>
+    <td>${data.time}</td>
+    <td>${data.estuary}</td>
+    <td>${data.location}</td>
+    <td>${data.weather}</td>
+    <td>${data.tide}</td>
+    <td>
+      <a href="${data.imageUrl}" target="_blank">
+        <img src="${data.imageUrl}" alt="seagrass photo" width="60" style="border-radius: 4px;">
+      </a>
+    </td>
+    <td><button onclick="deleteEntry('${id}')">🗑️</button></td>
+  `;
+  
 
     row.dataset.date = data.date;
     row.dataset.estuary = data.estuary.toLowerCase();
@@ -89,38 +94,113 @@ async function loadData() {
 
 // ❌ Delete Entry from Firestore + Storage
 window.deleteEntry = async (id) => {
-  if (!confirm("Are you sure you want to delete this entry?")) return;
+  if (!confirm("Are you sure you want to move this to trash?")) return;
 
   try {
-    await deleteDoc(doc(db, "sightings", id));
-    const imageRef = ref(storage, `sightings/${id}.jpg`);
-    await deleteObject(imageRef);
-    alert("✅ Entry deleted.");
-    loadData(); // Refresh table
+    // Get the original document first
+    const originalDoc = doc(db, "sightings", id);
+    const docSnap = await getDoc(originalDoc);
+
+    if (!docSnap.exists()) {
+      alert("❌ Entry not found.");
+      return;
+    }
+
+    const data = docSnap.data();
+
+    // ✅ Move to "deleted_sightings"
+    await setDoc(doc(db, "deleted_sightings", id), {
+      ...data,
+      deletedAt: new Date()
+    });
+
+    // ✅ Try deleting from original collection
+    await deleteDoc(originalDoc);
+    console.log("✅ Firestore entry moved and deleted");
+
+    // ✅ Try deleting from Storage
+    if (data.imageUrl) {
+      const imageRef = ref(storage, `sightings/${id}.jpg`);
+      try {
+        await deleteObject(imageRef);
+        console.log("✅ Image deleted");
+      } catch (imgErr) {
+        console.warn("⚠️ Image might not exist:", imgErr.message);
+      }
+    } else {
+      console.log("ℹ️ No image attached to this entry.");
+    }
+    
+
+    alert("✅ Entry moved to trash.");
+    loadData();
   } catch (error) {
-    console.error("Delete error:", error);
-    alert("❌ Error deleting entry.");
+    console.error("❌ Something went wrong in deleteEntry:");
+    console.error("→ Error message:", error.message);
+    console.error("→ Error object:", error);
+    alert(`❌ Error: ${error.message}`);
   }
+  
 };
+
+
 
 // 📤 Export to CSV
 window.downloadCSV = () => {
+  if (!window.allData || window.allData.length === 0) {
+    alert("No data to download.");
+    return;
+  }
+
+  // ✅ Column Headers
   const csvRows = [
-    ["Date", "Time", "Estuary", "Location", "Weather", "Tide", "ImageURL"],
-    ...window.allData.map(d =>
-      [d.date, d.time, d.estuary, d.location, d.weather, d.tide, d.imageUrl]
-    )
+    ["Date", "Time", "Estuary", "Latitude", "Longitude", "Weather", "Tide", "Image URL", "Submitted At"]
   ];
 
-  const csvContent = csvRows.map(e => e.join(",")).join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv" });
+  // ✅ Loop through each entry
+  window.allData.forEach((d) => {
+    // Split location
+    let lat = "";
+    let lng = "";
+    if (d.location && d.location.includes(",")) {
+      [lat, lng] = d.location.split(",").map(coord => coord.trim());
+    }
+
+    // Format timestamp
+    let submittedAt = "";
+    if (d.timestamp?.toDate) {
+      submittedAt = d.timestamp.toDate().toISOString(); // e.g. 2025-03-28T04:15:00Z
+    }
+
+    // Add row to CSV
+    csvRows.push([
+      d.date || "",
+      d.time || "",
+      d.estuary || "",
+      lat,
+      lng,
+      d.weather || "",
+      d.tide || "",
+      d.imageUrl || "",
+      submittedAt
+    ]);
+  });
+
+  // ✅ Convert to CSV string
+  const csvContent = csvRows.map(row => row.join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
+  // ✅ Trigger download
   const link = document.createElement("a");
   link.href = url;
   link.download = "seagrass_sightings.csv";
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
 };
+
+
 
 // 🔍 Filters
 document.getElementById("filter-estuary").addEventListener("input", () => {
