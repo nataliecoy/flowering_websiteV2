@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="robots" content="noindex, nofollow">
   <title>Contact Us | Seagrass Project</title>
   <link rel="stylesheet" href="styles.css">
   <style>
@@ -10,7 +9,7 @@
       max-width: 700px;
       margin: 100px auto;
       padding: 20px;
-      background: #002433;
+      background: #063120;
       border-radius: 8px;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
       color: white;
@@ -43,7 +42,7 @@
     }
 
     .contact-container button {
-      background-color: #00ffcc;
+      background-color: #7cd6c4;
       color: #001524;
       font-weight: bold;
       padding: 12px;
@@ -65,17 +64,19 @@
 </head>
 <body>
 
-  <header>
-    <nav>
-      <a href="index.html" class="logo">Seagrass Project</a>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="upload.html">Upload Data</a></li>
-        <li><a href="map.html">View Sightings</a></li>
-        <li><a href="contact.html">Contact Us</a></li>
-      </ul>
-    </nav>
-  </header>
+  <!-- ✅ Navigation -->
+ <header>
+      <nav>
+        <a href="index.html" class="logo">
+          <img src="assets/logo.png" alt="Seeds of the Sea Logo" style="height: 100px;">
+        </a>      
+        <ul class="nav-links">
+          <li><a href="about.html">About</a></li>
+          <li><a href="upload.html">Upload Data</a></li>
+          <li><a href="map.html">Sightings</a></li>
+        </ul>
+      </nav>
+    </header>
 
   <section class="contact-container">
     <h2>Contact Us</h2>
@@ -88,16 +89,17 @@
       <p class="confirmation" id="confirmation-text"></p>
     </form>
   </section>
-
-  <footer style="background: #000a12; padding: 30px 0; color: white; text-align: center;">
+  
+  <!-- ✅ Footer -->
+  <footer style="background: #032419; padding: 30px 0; color: white; text-align: center;">
     <div style="max-width: 1000px; margin: auto; padding: 0 20px;">
-      <p style="margin-bottom: 15px;">&copy; 2025 Seagrass Restoration Project • Protecting Ocean Life</p>
+      <p style="margin-bottom: 15px;">&copy; 2025 Seeds of the Sea • Restoring Seagrass Meadows</p>
       <nav style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; font-size: 15px;">
-        <a href="index.html" style="color: #00ffcc; text-decoration: none;">Home</a>
-        <a href="upload.html" style="color: #00ffcc; text-decoration: none;">Upload Data</a>
-        <a href="map.html" style="color: #00ffcc; text-decoration: none;">Sightings</a>
-        <a href="contact.html" style="color: #00ffcc; text-decoration: none;">Contact Us</a>
-        <a href="admin.html" style="color: #00ffcc; text-decoration: none;">Admin</a>
+        <a href="index.html" style="color: #99e9d9; text-decoration: none;">Home</a>
+        <a href="upload.html" style="color: #99e9d9; text-decoration: none;">Upload Data</a>
+        <a href="map.html" style="color: #99e9d9; text-decoration: none;">Sightings</a>
+        <a href="contact.html" style="color: #99e9d9; text-decoration: none;">Contact Us</a>
+        <a href="admin.html" style="color: #99e9d9; text-decoration: none;">Admin</a>
       </nav>
     </div>
   </footer>
@@ -155,12 +157,12 @@
           message: message
         });
 
-        confirmation.textContent = "✅ Message sent successfully!";
+        confirmation.textContent = "Message sent successfully!";
         confirmation.style.color = "#00ffcc";
         this.reset();
       } catch (err) {
-        console.error("❌ Error submitting contact form:", err);
-        confirmation.textContent = "❌ Something went wrong. Please try again later.";
+        console.error("Error submitting contact form:", err);
+        confirmation.textContent = "Something went wrong. Please try again later.";
         confirmation.style.color = "red";
       }
     });
