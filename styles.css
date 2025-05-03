@@ -26,6 +26,7 @@ header {
 /* ✅ Header when Scrolled */
 header.scrolled {
     background: #588c7f; /* Solid Dark Green */
+
 }
 
 /* ✅ Navigation Layout */
@@ -218,46 +219,3 @@ html, body {
     height: auto;
     overflow-y: auto;
   }
-
-  .pillar {
-    max-width: 800px;
-    margin: 60px auto;
-    text-align: center;
-  }
-  
-  .pillar h2 {
-    font-size: 32px;
-    margin-bottom: 10px;
-    color: #00ffcc;
-  }
-  
-  .pillar p {
-    font-size: 18px;
-    line-height: 1.6;
-    color: white;
-  }
-  
-  /* Swiper full height */
-.swiper {
-    width: 70%;
-    height: 40vh;
-  }
-  
-  .swiper-slide {
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .slide-content {
-    background: rgba(0, 0, 0, 0.5); /* dark overlay */
-    color: white;
-    text-align: center;
-    padding: 40px;
-    border-radius: 0px;
-    max-width: 800px;
-  }
-  
